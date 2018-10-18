@@ -22,14 +22,14 @@ public class Cache {
     private double indexBits;
     String name;
     Map mCache;
-    ArrayList<block_params>VC;
+    ArrayList<block_params>mVC;
     //Stats for the cache
     private int readReqs;
     private int readMiss;
     private int writeReqs;
     private int writeMiss;
     private int writeBack;
-
+    private int swapsVC;
     //initialize the cache
     public Cache(String inName, long blockSize, long cacheSize, long associativity, long vc_blocks){
         mCache=new HashMap();
@@ -68,14 +68,14 @@ public class Cache {
             mCache.put(binAddr,block_row);
         }
         if(vc_blocks !=0){
-            VC = new ArrayList<block_params>();
+            mVC = new ArrayList<block_params>();
             for (long j=0; j<vc_blocks; j++){
                 block_params default_block = new block_params();
                 default_block.dirty_bit=0;
                 default_block.valid_bit=0;
                 default_block.tag="";
                 default_block.lru_counter=j;
-                VC.add(default_block);
+                mVC.add(default_block);
             }
         }
     }
@@ -86,29 +86,44 @@ public class Cache {
         readReqs=readReqs+1;
         //System.out.println(name+ " READ REQ TAG " +reqTag + " INDEX " +reqIndex);
         boolean hit_miss= getBlock(reqIndex, reqTag,0); //find the block to read
-        if(!hit_miss){ //cache miss
-            readMiss= readMiss+1;
-            //System.out.println(name+ " READ MISS");
-            String blockToBeEvicted = getLRUEvict(reqIndex);
-            //Dirty block to be evicted
-            if (blockToBeEvicted==""){
-                //No writeback only read request to next to next level
-                nextLevel.flag= 1;
-                nextLevel.readReqAddr= addr;
-                nextLevel.writeBackAddr= "";
-                setLRU(reqIndex, reqTag, 0);
-                return nextLevel;						
+        if(!hit_miss){ //cache miss            
+            if(mVC == null){
+                String blockToBeEvicted = getLRUEvict(reqIndex);
+                readMiss= readMiss+1;
+                //Dirty block to be evicted
+                if (blockToBeEvicted==""){
+                    //No writeback only read request to next to next level
+                    nextLevel.flag= 1;
+                    nextLevel.readReqAddr= addr;
+                    nextLevel.writeBackAddr= "";
+                    setLRU(reqIndex, reqTag, 0);
+                    return nextLevel;						
+                }
+                //Clean block to be evicted
+                else{
+                    //read request and write request to next level
+                    writeBack=writeBack+1;
+                    nextLevel.flag= 2;
+                    nextLevel.readReqAddr= addr;
+                    nextLevel.writeBackAddr= blockToBeEvicted+reqIndex;
+                    setLRU(reqIndex, reqTag, 0);
+                    return nextLevel;				
+                }
             }
-            //Clean block to be evicted
             else{
-                //read request and write request to next level
-                //System.out.println(name+ " WRITEBACK");
-                writeBack=writeBack+1;
-                nextLevel.flag= 2;
-                nextLevel.readReqAddr= addr;
-                nextLevel.writeBackAddr= blockToBeEvicted+reqIndex;
-                setLRU(reqIndex, reqTag, 0);
-                return nextLevel;				
+                boolean doesVCHaveIt= checkVC(addr);
+                if(doesVCHaveIt){                    
+                    //swap elem out of VC with block to be evicted from set
+                    //update lru so that VC block is MRU and set block is MRU
+                    //update dirty bits as well
+                    //return nextLevel flag set to 0 as hit in VC
+                }
+                else{
+                    
+                    // set block to be evited to VC
+                    // get writeback address from VC for next level if dirty bit == 1 otherwise evict and update the block with evicited block from L1
+                    // read request to next level by setting nextLevel==1 if no eviction from VC or 
+                }
             }
         }
         //cache hit
@@ -218,7 +233,7 @@ public class Cache {
             }
         }
     }
-    void swap(){};
+
     void print(){
         System.out.println(name +" READ REQS "+ readReqs);
         System.out.println(name +" READ MISSES "+ readMiss);
@@ -226,4 +241,15 @@ public class Cache {
         System.out.println(name +" WRITE MISSES "+ writeMiss);
         System.out.println(name +" WRITEBACK TO NEXT LEVEL "+ writeBack);
     }
+    
+    /////////////////////VC Methods//////////////
+    boolean checkVC(String address){
+        for (block_params e: mVC){
+            if(e.tag.equalsIgnoreCase(address) && e.valid_bit== 1) return true;
+        }
+        return false;
+    }
+    
+    void swap(){};
+    
 }
