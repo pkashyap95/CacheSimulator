@@ -124,10 +124,36 @@ public class Memory {
     
     void printStats(){
         L1.displayCacheContents();
-        //if(L2 !=null) L2.displayCacheContents();
-        L1.print();
-        if(L2 != null) L2.print();
-        if(VC != null) VC.print();
-        System.out.println("Toatl memory references "+ (memRef+memWriteBack));
+        if(L2 !=null) L2.displayCacheContents();
+        System.out.println("===== Simulation results =====");
+        String [] message=new String[15];
+        System.out.println("  a. number of L1 reads:                       "+L1.getReadReq());
+        System.out.println("  b. number of L1 read misses:                 "+L1.getReadMisses());
+        System.out.println("  c. number of L1 writes:                      "+L1.getWriteReq());
+        System.out.println("  d. number of L1 write misses:                "+L1.getWriteMisses());
+        System.out.println("  e. number of swap requests:                  "+L1.getSwapsReq());
+        System.out.println("  f. swap request rate:                        "+L1.getSwapReqRate());
+        System.out.println("  g. number of swaps:                          "+L1.getSwaps());
+        System.out.println("  h. combined L1+VC miss rate:                 "+L1.combinedMissRate());
+        System.out.println("  i. number of writebacks from L1/VC:          "+L1.getWritebacks());
+        
+        if(L2!= null){
+            System.out.println("  j. number of L2 reads:                   "+L2.getReadReq());
+            System.out.println("  k. number of L2 read misses:             "+L2.getReadMisses());
+            System.out.println("  l. number of L2 writes:                  "+L2.getWriteReq());
+            System.out.println("  m. number of L2 write misses:            "+L2.getWriteMisses());
+            System.out.println("  n. L2 miss rate:                         "+L2.getFinalLevel());
+            System.out.println("  o. number of writebacks from L2:         "+L2.getWritebacks());
+        }
+        
+        else{
+            System.out.println("  j. number of L2 reads:                       "+0);
+            System.out.println("  k. number of L2 read misses:                 "+0);
+            System.out.println("  l. number of L2 writes:                      "+0);
+            System.out.println("  m. number of L2 write misses:                "+0);
+            System.out.println("  n. L2 miss rate:                             "+0.00);
+            System.out.println("  o. number of writebacks from L2:             "+0);
+        }
+        System.out.println("  p. total memory traffic                      "+ (memRef+memWriteBack));
     }
 }
