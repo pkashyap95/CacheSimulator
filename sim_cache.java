@@ -41,8 +41,7 @@ public class sim_cache
                 "  VC_NUM_BLOCKS:                    %d%n"+
                 "  L2_SIZE:                          %d%n"+
                 "  L2_ASSOC:                         %d%n"+
-                "  trace_file:                       %s%n"+
-                "  ===================================%n%n", params.block_size, params.l1_size, params.l1_assoc, params.vc_num_blocks, params.l2_size, params.l2_assoc, trace_file);
+                "  trace_file:                       %s%n%n", params.block_size, params.l1_size, params.l1_assoc, params.vc_num_blocks, params.l2_size, params.l2_assoc, trace_file);
         // Read file line by line
 //        Cache L1= new Cache("L1",params.block_size, params.l1_size, params.l1_assoc);
 //        Cache L2= new Cache("L2",params.block_size, params.l2_size, params.l2_assoc);
@@ -79,10 +78,10 @@ public class sim_cache
                     }
                     else{
                         if(params.l2_size == 0){
-                            memHeir.readL1VC(binaryAddr);
+                            memHeir.readL1(binaryAddr);
                         }
                         else{
-                            memHeir.readFull(binaryAddr);
+                            memHeir.readL1L2(binaryAddr);
                         }
                     }
                 }
@@ -97,10 +96,10 @@ public class sim_cache
                     }
                     else{
                         if(params.l2_size == 0){
-                            memHeir.writeL1VC(binaryAddr);
+                            memHeir.writeL1(binaryAddr);
                         }
                         else{
-                            memHeir.writeFull(binaryAddr);
+                            memHeir.writeL1L2(binaryAddr);
                         }
                     }
                 };

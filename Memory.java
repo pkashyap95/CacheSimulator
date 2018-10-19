@@ -123,13 +123,11 @@ public class Memory {
     }    
     
     void printStats(){
+        L1.displayCacheContents();
+        //if(L2 !=null) L2.displayCacheContents();
         L1.print();
         if(L2 != null) L2.print();
         if(VC != null) VC.print();
         System.out.println("Toatl memory references "+ (memRef+memWriteBack));
     }
-    void writeL1VC(String address){};
-    void readL1VC(String address){};
-    void writeFull(String address){};
-    void readFull(String address){};
 }

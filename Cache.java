@@ -82,6 +82,7 @@ public class Cache {
             }
         }
     }
+    
     returnVal read(String addr){
         returnVal nextLevel = new returnVal();
         String reqTag   = addr.substring(0, addr.length()-(int) indexBits);
@@ -94,7 +95,7 @@ public class Cache {
             if(mVC == null){
                 String blockToBeEvicted = getLRUEvict(reqIndex);
                 //Dirty block to be evicted
-                if (blockToBeEvicted==""){
+                if (blockToBeEvicted.equals("")){
                     //No writeback only read request to next to next level
                     nextLevel.flag= 1;
                     nextLevel.readReqAddr= addr;
@@ -116,7 +117,7 @@ public class Cache {
             else{
                 long doesVCHaveIt = checkVC(addr);
                 if(doesVCHaveIt !=-1){                    
-                    System.out.println("SHOULD BE SWAPPING");
+                    //System.out.println("SHOULD BE SWAPPING");
                     swap(addr, reqIndex, doesVCHaveIt, 0);
                     nextLevel.flag= 0;
                     nextLevel.readReqAddr= "";
@@ -124,22 +125,22 @@ public class Cache {
                     return nextLevel;
                 }
                 else{
-                    String VCBlockToBeEvicted = getVCEvict(reqIndex);
-                    if(VCBlockToBeEvicted==""){
+                    String writeNextLevel= setLRUVC(addr, 0);
+                    if(writeNextLevel.equals("")){
+                        //read request to next level
                         nextLevel.flag= 1;
                         nextLevel.readReqAddr= addr;
                         nextLevel.writeBackAddr= "";
-                        setLRU(reqIndex, reqTag, 0);
-                        return nextLevel;
+                        //setLRU(reqIndex, reqTag, 1);
+                        return nextLevel;  
                     }
                     else{
-                    //read request and write request to next level
-                        writeBack=writeBack+1;
+                        writeBack++;
                         nextLevel.flag= 2;
                         nextLevel.readReqAddr= addr;
-                        nextLevel.writeBackAddr= VCBlockToBeEvicted;
-                        setLRU(reqIndex, reqTag, 0);
-                        return nextLevel;               
+                        nextLevel.writeBackAddr=writeNextLevel;
+                        //setLRU(reqIndex, reqTag, 2);
+                        return nextLevel;  
                     }
                     // get writeback address from VC for next level if dirty bit == 1 otherwise evict and update the block with evicited block from L1
                     // read request to next level by setting nextLevel==1 if no eviction from VC or 
@@ -169,7 +170,7 @@ public class Cache {
                 //System.out.println(name+ " WRITE MISS");
                 String blockToBeEvicted = getLRUEvict(reqIndex);
                 //Dirty block to be evicted
-                if (blockToBeEvicted==""){
+                if (blockToBeEvicted.equals("")){
                     //No writeback only read request to next to next level
                     nextLevel.flag= 1;
                     nextLevel.readReqAddr= addr;
@@ -200,10 +201,23 @@ public class Cache {
                     return nextLevel;
                 }
                 else{
-                    return nextLevel;
-                    // CHECK IF 
-                    // get writeback address from VC for next level if dirty bit == 1 otherwise evict and update the block with evicited block from L1
-                    // read request to next level by setting nextLevel==1 if no eviction from VC or 
+                    String writeNextLevel= setLRUVC(addr, 1);
+                    if(writeNextLevel.equals("")){
+                        //read request to next level
+                        nextLevel.flag= 1;
+                        nextLevel.readReqAddr= addr;
+                        nextLevel.writeBackAddr= "";
+                        //setLRU(reqIndex, reqTag, 1);
+                        return nextLevel;  
+                    }
+                    else{
+                        writeBack++;
+                        nextLevel.flag= 2;
+                        nextLevel.readReqAddr= addr;
+                        nextLevel.writeBackAddr=writeNextLevel;
+                        //setLRU(reqIndex, reqTag, 2);
+                        return nextLevel;  
+                    }
                 }
             }
         }
@@ -273,15 +287,13 @@ public class Cache {
         }
     }
     void print(){
+        System.out.println("===== Simulation Results =====");
         System.out.println("number of "+name +" read requests "+ readReqs);
         System.out.println("number of "+name +" read misses "+ readMiss);
         System.out.println("number of "+name +" write requests  " + writeReqs);
         System.out.println("number of "+name +" write misses "+ writeMiss);
         System.out.println("number of swap requests "+ swapsVC);
         System.out.println("number of writebacks from " + name+"/VC " + writeBack);
-        for(block_params e: mVC){
-            System.out.print("Tag: " + e.tag+ " ");
-        }
     }
     
     /////////////////////VC Methods//////////////
@@ -291,30 +303,11 @@ public class Cache {
         }
         return -1;
     }
-    String getVCEvict (String index){
-        System.out.println("EVICT");
-        String blockToEvict="";
-        ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(index);
-        for(block_params e: mVC){
-            if(e.lru_counter == mVC.size()-1) { //block's LRU counter is highest in VC
-                if(e.dirty_bit == 1) blockToEvict=e.tag;
-                for(block_params mainCache: block_row){
-                    //block in main cache that is going to be moved to VC found
-                    if(mainCache.lru_counter == mAssoc-1) {
-                        //Swap the block into VC
-                        e.tag=mainCache.tag; 
-                        e.valid_bit=1;
-                        e.dirty_bit=mainCache.dirty_bit;
-                    }
-                }
-            }           
-        }
-        return blockToEvict;
-    }
+
     void swap(String address, String index,long indexVCLoc, int flag){ //address
         ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(index);
         for(block_params e: block_row){
-            System.out.println("SWAP");
+            //System.out.println("SWAP");
             if(e.lru_counter==mAssoc-1){//THE LRU BLOCK IN MAIN CACHE
                 for(block_params x:mVC){
                     if(x.lru_counter < indexVCLoc) x.lru_counter=x.lru_counter+1;
@@ -339,45 +332,122 @@ public class Cache {
     }
     
     String setLRUVC(String address, int flag){
+        int decimal = Integer.parseInt(address,2);
+        String hexStr = Integer.toString(decimal,16);
+        //System.out.println("ADDRESS " + hexStr);
         String writeBack="";
         String reqTag   = address.substring(0, address.length()-(int) indexBits);
         String reqIndex = address.substring(address.length()-(int)indexBits);
         ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(reqIndex);
         for(block_params e: block_row){
-            if(e.lru_counter==mAssoc-1){ //THE LRU BLOCK IN MAIN CACHE THAT WILL BE EVICTED IF VALID
-                if(e.valid_bit==1){ //the block has content move it to VC
-                    for(block_params x:mVC){
+            if(e.lru_counter==mAssoc-1){                                            //THE LRU BLOCK IN MAIN CACHE THAT WILL BE EVICTED IF VALID
+                if(e.valid_bit==1){                                                 //valid block from cache is making a request                     
+                    for(block_params x:mVC){                                        //move the valid block to LRU in cache
                         if(x.lru_counter == mVCBlocks-1){
-                            if(x.dirty_bit==1) { //evict the block and set writeback
+                            if(x.dirty_bit==1) {                                    //if the LRU in VC is dirty initaite writeback
                                 writeBack=x.tag;
-                            }
-                            //update the VC 
-                            x.lru_counter=0;
+                            }                               
+                            x.lru_counter=0;                                        //Move the block from Cache to VC
                             x.valid_bit=1;
                             x.tag=e.tag+reqIndex;
                             x.dirty_bit=e.dirty_bit;
-                            if(flag ==1) e.dirty_bit=1;
-                            else e.dirty_bit=0;
-                            e.lru_counter=0;
+                            if(flag ==1) {e.dirty_bit=1;}
+                            else {e.dirty_bit=0;}
+                            e.lru_counter=0;                                        //Update the cache contents for the actual request
                             e.tag=reqTag;
                             e.valid_bit=1;
+                            if(flag==1) e.dirty_bit=1;
+                            else e.dirty_bit=0;
                             }
-                        else{
+                        else{                                                       //for every other block in VC update the lru by incrementing it by if less than the current
                             x.lru_counter=x.lru_counter+1;
                         }
                     }
                 }
+                //if the LRU is invalid update the LRU block 
                 else{
-                    if(flag ==1) e.dirty_bit=1;
+                    if(flag == 1) e.dirty_bit=1;
                     else e.dirty_bit=0;
                     e.lru_counter=0;
                     e.tag=reqTag;
                     e.valid_bit=1;
                 }
             }
-            e.lru_counter=e.lru_counter+1;
+            else{
+                e.lru_counter=e.lru_counter+1;
+            }
         }
+//        System.out.println("------------------------- ");
+//        for(block_params e:block_row){
+//                hexStr=e.tag;
+//                String dirty="";
+//                if(e.dirty_bit==1) dirty="D";
+//                if(!e.tag.equals("")){
+//                    decimal = Integer.parseInt(e.tag,2);
+//                    hexStr = Integer.toString(decimal,16);
+//                    System.out.print(hexStr+ " "+ dirty+"  " + "LRU COUNTER "+ e.lru_counter + "      ");
+//                }
+//                else{
+//                    System.out.print("        "+ " "+ dirty+"   ");
+//                }
+//            }
+//        System.out.print("\n");
         return writeBack;
     }
-    
+    void displayCacheContents(){
+        System.out.println("===== "+name+" contents =====");
+        for(long i=0; i<mNumOfSets; i++){
+            String binAddr= Long.toBinaryString(i);
+            String prepend="";
+            if(binAddr.length()<indexBits){
+                prepend= "0";
+                for(int x=1; x<indexBits-binAddr.length();x++){
+                    prepend+="0";
+                }
+            }
+            binAddr=prepend+ binAddr;
+            int decimal = Integer.parseInt(binAddr,2);
+            
+            block_params []toDisplay = new block_params[(int)mAssoc];
+            
+            ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(binAddr);
+            if(decimal<10) System.out.print("  set   "+ decimal+":   ");
+            else if(decimal >= 10 && decimal<100) System.out.print("  set  "+ decimal+":   ");
+            for(block_params e: block_row){
+                toDisplay[(int)e.lru_counter]=e;
+            }
+            for(int k=0; k < (int)mAssoc; k++){
+                block_params temp= toDisplay[k];
+                String hexStr=temp.tag;
+                String dirty=" ";
+                if(temp.dirty_bit==1) dirty="D";
+                if(!temp.tag.equals(" ")){
+                    decimal = Integer.parseInt(temp.tag,2);
+                    hexStr = Integer.toString(decimal,16);
+                    System.out.print(hexStr+ " "+ dirty+"  ");
+                }
+                else{
+                    System.out.print("      "+ " "+ dirty+"  ");
+                }
+            }
+            System.out.print("\n");
+        }
+        if(mVC!=null){
+            System.out.println("===== VC contents =====");
+            for(block_params e:mVC){
+                String hexStr=e.tag;
+                String dirty="";
+                if(e.dirty_bit==1) dirty="D";
+                if(!e.tag.equals("")){
+                    int decimal = Integer.parseInt(e.tag,2);
+                    hexStr = Integer.toString(decimal,16);
+                    System.out.print(hexStr+ " "+ dirty+"  ");
+                }
+                else{
+                    System.out.print("        "+ " "+ dirty+"   ");
+                }
+            }
+        }
+        System.out.print("\n");
+    }
 }
