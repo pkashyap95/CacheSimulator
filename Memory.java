@@ -8,6 +8,8 @@
  *
  * @author Priyank Kashyap
  */
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 public class Memory {
     
     Cache L1;
@@ -126,34 +128,63 @@ public class Memory {
         L1.displayCacheContents();
         if(L2 !=null) L2.displayCacheContents();
         System.out.println("===== Simulation results =====");
-        String [] message=new String[15];
-        System.out.println("  a. number of L1 reads:                       "+L1.getReadReq());
-        System.out.println("  b. number of L1 read misses:                 "+L1.getReadMisses());
-        System.out.println("  c. number of L1 writes:                      "+L1.getWriteReq());
-        System.out.println("  d. number of L1 write misses:                "+L1.getWriteMisses());
-        System.out.println("  e. number of swap requests:                  "+L1.getSwapsReq());
-        System.out.println("  f. swap request rate:                        "+L1.getSwapReqRate());
-        System.out.println("  g. number of swaps:                          "+L1.getSwaps());
-        System.out.println("  h. combined L1+VC miss rate:                 "+L1.combinedMissRate());
-        System.out.println("  i. number of writebacks from L1/VC:          "+L1.getWritebacks());
+        String [] message=new String[16];
+        message[0]  = "  a. number of L1 reads:";
+        message[1]  = "  b. number of L1 read misses:";
+        message[2]  = "  c. number of L1 writes:";
+        message[3]  = "  d. number of L1 write misses:";
+        message[4]  = "  e. number of swap requests:   ";
+        message[5]  = "  f. swap request rate:";
+        message[6]  = "  g. number of swaps:";
+        message[7]  = "  h. combined L1+VC miss rate:";
+        message[8]  = "  i. number of writebacks from L1/VC:";
+        message[9] = "  j. number of L2 reads:";
+        message[10] = "  k. number of L2 read misses:";
+        message[11] = "  l. number of L2 writes:";
+        message[12] = "  m. number of L2 write misses:";
+        message[13] = "  n. L2 miss rate:";
+        message[14] = "  o. number of writebacks from L2:";
+        message[15] = "  p. total memory traffic:";
         
-        if(L2!= null){
-            System.out.println("  j. number of L2 reads:                   "+L2.getReadReq());
-            System.out.println("  k. number of L2 read misses:             "+L2.getReadMisses());
-            System.out.println("  l. number of L2 writes:                  "+L2.getWriteReq());
-            System.out.println("  m. number of L2 write misses:            "+L2.getWriteMisses());
-            System.out.println("  n. L2 miss rate:                         "+L2.getFinalLevel());
-            System.out.println("  o. number of writebacks from L2:         "+L2.getWritebacks());
+        DecimalFormat df = new DecimalFormat("#.####");
+        df.setRoundingMode(RoundingMode.CEILING);
+        double x=0.000000;
+        String data[]=new String[16];
+        data[0]  = String.valueOf(L1.getReadReq());
+        data[1]  = String.valueOf(L1.getReadMisses());
+        data[2]  = String.valueOf(L1.getWriteReq());
+        data[3]  = String.valueOf(L1.getWriteMisses());
+        data[4]  = String.valueOf(L1.getSwapsReq());
+        data[5]  = df.format(L1.getSwapReqRate());
+        data[6]  = String.valueOf(L1.getSwaps());
+        data[7]  = df.format(L1.combinedMissRate());
+        data[8]  = String.valueOf(L1.getWritebacks());
+        if(L2!=null){
+                data[9] = String.valueOf(L2.getReadReq());
+                data[10] = String.valueOf(L2.getReadMisses());
+                data[11] = String.valueOf(L2.getWriteReq());
+                data[12] = String.valueOf(L2.getWriteMisses());
+                data[13] = df.format(L2.getFinalLevel());
+                data[14] = String.valueOf(L2.getWritebacks());
         }
-        
         else{
-            System.out.println("  j. number of L2 reads:                       "+0);
-            System.out.println("  k. number of L2 read misses:                 "+0);
-            System.out.println("  l. number of L2 writes:                      "+0);
-            System.out.println("  m. number of L2 write misses:                "+0);
-            System.out.println("  n. L2 miss rate:                             "+0.00);
-            System.out.println("  o. number of writebacks from L2:             "+0);
+                data[9] = String.valueOf(0);
+                data[10] = String.valueOf(0);
+                data[11] = String.valueOf(0);
+                data[12] = String.valueOf(0);
+                data[13] = String.valueOf(0.00000);
+                data[14] = String.valueOf(0);
         }
-        System.out.println("  p. total memory traffic                      "+ (memRef+memWriteBack));
+        data[15] = String.valueOf(memRef+memWriteBack);
+
+        int length=52;
+        for(int i=0; i<=15; i++){
+            String spaces=" ";
+            int numOfSpaces= 52-message[i].length()-data[i].length();
+            for(int j=0; j<numOfSpaces; j++){
+                spaces=spaces+" ";
+            }
+            System.out.println(message[i]+spaces+data[i]);
+        }
     }
 }

@@ -85,10 +85,17 @@ public class Cache {
     //////////////Regular Cache Methods/////////////////
     returnVal read(String addr){
         returnVal nextLevel = new returnVal();
-        String reqTag   = addr.substring(0, addr.length()-(int) indexBits);
-        String reqIndex = addr.substring(addr.length()-(int)indexBits);
+        String reqTag   ;
+        String reqIndex ;
+        if(indexBits==0){
+            reqTag   = addr;
+            reqIndex ="";
+        }
+        else{
+            reqTag   = addr.substring(0, addr.length()-(int) indexBits);
+            reqIndex = addr.substring(addr.length()-(int)indexBits);
+        }
         readReqs=readReqs+1;
-        //System.out.println(name+ " READ REQ TAG " +reqTag + " INDEX " +reqIndex);
         boolean hit_miss= getBlock(reqIndex, reqTag,0); //find the block to read
         if(!hit_miss){ //cache miss
             readMiss= readMiss+1;            
@@ -168,10 +175,18 @@ public class Cache {
     }        
     returnVal write(String addr){
         returnVal nextLevel = new returnVal();
-        String reqTag   = addr.substring(0, addr.length()-(int) indexBits);
-        String reqIndex = addr.substring(addr.length()-(int)indexBits);
+        String reqTag;
+        String reqIndex;
+        if(indexBits==0){
+            reqTag   = addr;
+            reqIndex ="";
+        }
+        else{
+            reqTag   = addr.substring(0, addr.length()-(int) indexBits);
+            reqIndex = addr.substring(addr.length()-(int)indexBits);
+        }
         writeReqs=writeReqs+1;
-        //System.out.println(name+ " WRITE REQ TAG " +reqTag+ " INDEX " +reqIndex);
+         //System.out.println(name+ " WRITE REQ TAG " +reqTag+ " INDEX " +reqIndex);
         boolean hit_miss= getBlock(reqIndex, reqTag,1); //find the block to read
         //System.out.println(" HIT MISS " + hit_miss);
         if(!hit_miss){ //cache miss
@@ -255,7 +270,14 @@ public class Cache {
     
     ///////////////////////////////////////////////////////
     boolean getBlock(String index, String reqTag, int flag){
-        ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(index);
+        ArrayList<block_params> block_row;
+        if(index==""){
+            block_row=(ArrayList<block_params>) mCache.get("0");
+        }
+        else{
+            block_row= (ArrayList<block_params>) mCache.get(index);
+        }
+        
         for(block_params e:block_row){
             if(e.tag.equalsIgnoreCase(reqTag) && e.valid_bit == 1) { //block is valid and address is in cache
                 updateHitLRU(index, e.lru_counter); //update the LRU for hits
@@ -269,7 +291,13 @@ public class Cache {
         return false;
     }
     void updateHitLRU(String index, long current_count){
-        ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(index);
+        ArrayList<block_params> block_row;
+        if(index==""){
+            block_row=(ArrayList<block_params>) mCache.get("0");
+        }
+        else{
+            block_row= (ArrayList<block_params>) mCache.get(index);
+        }
         for(block_params e:block_row){
             if(e.lru_counter < current_count){
                 e.lru_counter=e.lru_counter+1;
@@ -278,7 +306,13 @@ public class Cache {
     }
     String getLRUEvict(String index){
         String dirtyBlockToEvict="";
-        ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(index);
+        ArrayList<block_params> block_row;
+        if(index==""){
+            block_row=(ArrayList<block_params>) mCache.get("0");
+        }
+        else{
+            block_row= (ArrayList<block_params>) mCache.get(index);
+        }
         for(block_params e: block_row){
             if(e.lru_counter == mAssoc-1) { //block is valid and address is in cache
                 if(e.dirty_bit == 1){
@@ -289,7 +323,13 @@ public class Cache {
         return dirtyBlockToEvict;
     }
     void setLRU(String index, String tag, int flag){
-        ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(index);
+        ArrayList<block_params> block_row;
+        if(index==""){
+            block_row=(ArrayList<block_params>) mCache.get("0");
+        }
+        else{
+            block_row= (ArrayList<block_params>) mCache.get(index);
+        }
         for(block_params e: block_row){
             if(e.lru_counter == mAssoc-1){
                 if(flag==0){
@@ -321,7 +361,13 @@ public class Cache {
         return -1;
     }
     void swap(String address, String index,long indexVCLoc, int flag){ //address
-        ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(index);
+        ArrayList<block_params> block_row;
+        if(index==""){
+            block_row=(ArrayList<block_params>) mCache.get("0");
+        }
+        else{
+            block_row= (ArrayList<block_params>) mCache.get(index);
+        }
         for(block_params e: block_row){
             //System.out.println("SWAP");
             if(e.lru_counter==mAssoc-1){//THE LRU BLOCK IN MAIN CACHE
@@ -351,9 +397,20 @@ public class Cache {
         String hexStr = Integer.toString(decimal,16);
         //System.out.println("ADDRESS " + hexStr);
         String writeBack="";
-        String reqTag   = address.substring(0, address.length()-(int) indexBits);
-        String reqIndex = address.substring(address.length()-(int)indexBits);
-        ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(reqIndex);
+       
+        ArrayList<block_params> block_row;
+        String reqTag;
+        String reqIndex;
+        if(indexBits==0){
+            reqTag   = address.substring(0, address.length()-(int) indexBits);
+            reqIndex = address.substring(address.length()-(int)indexBits);
+            block_row=(ArrayList<block_params>) mCache.get("0");
+        }
+        else{
+            reqTag   = address.substring(0, address.length()-(int) indexBits);
+            reqIndex = address.substring(address.length()-(int)indexBits);
+            block_row= (ArrayList<block_params>) mCache.get(reqIndex);
+        }
         for(block_params e: block_row){
             if(e.lru_counter==mAssoc-1){                                            //THE LRU BLOCK IN MAIN CACHE THAT WILL BE EVICTED IF VALID
                 if(e.valid_bit==1){                                                 //valid block from cache is making a request                     
@@ -396,7 +453,13 @@ public class Cache {
     }
     
     boolean areThereInvalidWays(String index){
-        ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(index);
+        ArrayList<block_params> block_row;
+        if(index==""){
+            block_row=(ArrayList<block_params>) mCache.get("0");
+        }
+        else{
+            block_row= (ArrayList<block_params>) mCache.get(index);
+        }
         for(block_params e:block_row){
             if(e.valid_bit==0){
                 return true;
@@ -422,8 +485,9 @@ public class Cache {
             block_params []toDisplay = new block_params[(int)mAssoc];                                   //Array of fixed size store LRU elements in order
             ArrayList<block_params> block_row = (ArrayList<block_params>) mCache.get(binAddr);
             if(decimal<10) System.out.print("  set   "+ decimal+":   ");                                //Display shifts
-            else if(decimal >= 10 && decimal<100) System.out.print("  set  "+ decimal+":   ");
-            else if(decimal >= 100 && decimal<1000) System.out.print("  set "+ decimal+":   ");
+            else if(decimal >= 10 && decimal<100) System.out.print("  set   "+ decimal+":   ");
+            else if(decimal >= 100 && decimal<1000) System.out.print("  set  "+ decimal+":   ");
+            else if(decimal >= 1000 && decimal<10000) System.out.print("  set "+ decimal+":   ");
             for(block_params e: block_row){
                 toDisplay[(int)e.lru_counter]=e;
             }
@@ -432,7 +496,7 @@ public class Cache {
                 String hexStr=temp.tag;
                 String dirty=" ";
                 if(temp.dirty_bit==1) dirty="D";
-                if(!temp.tag.equals(" ")){
+                if(!temp.tag.equals("")){
                     decimal = Integer.parseInt(temp.tag,2);
                     hexStr = Integer.toString(decimal,16);
                     System.out.print(hexStr+ " "+ dirty+"  ");
@@ -488,11 +552,8 @@ public class Cache {
     int getWritebacks(){
         return (int)writeBack;
     }
-    double MissRate(){
-        return 0.00;
-    }
-    int getSwapsReq(){
-        return (int)mSwapReq;
+    double getSwapsReq(){
+        return mSwapReq;
     }
     double getSwapReqRate(){
         return (mSwapReq/(readReqs+writeReqs));
