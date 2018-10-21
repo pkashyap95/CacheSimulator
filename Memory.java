@@ -125,9 +125,9 @@ public class Memory {
     }    
     
     void printStats(){
-        L1.displayCacheContents();
-        if(L2 !=null) L2.displayCacheContents();
-        System.out.println("===== Simulation results =====");
+        //L1.displayCacheContents();
+        //if(L2 !=null) L2.displayCacheContents();
+        //System.out.println("===== Simulation results =====");
         String [] message=new String[16];
         message[0]  = "  a. number of L1 reads:";
         message[1]  = "  b. number of L1 read misses:";
@@ -178,13 +178,15 @@ public class Memory {
         data[15] = String.valueOf(memRef+memWriteBack);
 
         int length=52;
+        if(L2!=null)System.out.print(L1.getBlocksize()+ " "+L1.getSize()+ " "+ L1.getAssoc()+" "+L1.getVCBlocks()+" "+L2.getSize()+" "+ L2.getAssoc());
+        else System.out.print(L1.getBlocksize()+ " "+L1.getSize()+ " "+ L1.getAssoc()+" "+L1.getVCBlocks()+" "+0+" "+ 0+ " ");
         for(int i=0; i<=15; i++){
-            String spaces=" ";
-            int numOfSpaces= 52-message[i].length()-data[i].length();
-            for(int j=0; j<numOfSpaces; j++){
-                spaces=spaces+" ";
-            }
-            System.out.println(message[i]+spaces+data[i]);
+//            String spaces=" ";
+//            int numOfSpaces= 52-message[i].length()-data[i].length();
+//            for(int j=0; j<numOfSpaces; j++){
+//                spaces=spaces+" ";
+//            }
+            System.out.print(data[i]+" ");
         }
     }
 }

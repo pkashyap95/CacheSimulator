@@ -34,14 +34,14 @@ public class sim_cache
         trace_file = args[6];
 
         // Print params
-        System.out.printf("  ===== Simulator configuration =====%n"+
-                "  L1_BLOCKSIZE:                     %d%n"+
-                "  L1_SIZE:                          %d%n"+
-                "  L1_ASSOC:                         %d%n"+
-                "  VC_NUM_BLOCKS:                    %d%n"+
-                "  L2_SIZE:                          %d%n"+
-                "  L2_ASSOC:                         %d%n"+
-                "  trace_file:                       %s%n%n", params.block_size, params.l1_size, params.l1_assoc, params.vc_num_blocks, params.l2_size, params.l2_assoc, trace_file);
+//        System.out.printf("  ===== Simulator configuration =====%n"+
+//                "  L1_BLOCKSIZE:                     %d%n"+
+//                "  L1_SIZE:                          %d%n"+
+//                "  L1_ASSOC:                         %d%n"+
+//                "  VC_NUM_BLOCKS:                    %d%n"+
+//                "  L2_SIZE:                          %d%n"+
+//                "  L2_ASSOC:                         %d%n"+
+//                "  trace_file:                       %s%n%n", params.block_size, params.l1_size, params.l1_assoc, params.vc_num_blocks, params.l2_size, params.l2_assoc, trace_file);
         // Read file line by line
 //        Cache L1= new Cache("L1",params.block_size, params.l1_size, params.l1_assoc);
 //        Cache L2= new Cache("L2",params.block_size, params.l2_size, params.l2_assoc);

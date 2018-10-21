@@ -564,4 +564,16 @@ public class Cache {
     double getFinalLevel(){
         return (readMiss)/(readReqs);
     }
+    long getBlocksize(){
+    }
+    long getAssoc(){
+        return mAssoc;
+    }
+    long getSize(){
+        return mCacheSize;
+    }
+    long getVCBlocks(){
+        return mVCBlocks;
+    }
+    
 }
