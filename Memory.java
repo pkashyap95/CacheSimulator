@@ -1,15 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author Priyank Kashyap
- */
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 public class Memory {
     
     Cache L1;
@@ -137,8 +125,8 @@ public class Memory {
         message[5]  = "  f. swap request rate:";
         message[6]  = "  g. number of swaps:";
         message[7]  = "  h. combined L1+VC miss rate:";
-        message[8]  = "  i. number of writebacks from L1/VC:";
-        message[9] = "  j. number of L2 reads:";
+        message[8]  = "  i. number writebacks from L1/VC:";
+        message[9]  = "  j. number of L2 reads:";
         message[10] = "  k. number of L2 read misses:";
         message[11] = "  l. number of L2 writes:";
         message[12] = "  m. number of L2 write misses:";
@@ -146,25 +134,23 @@ public class Memory {
         message[14] = "  o. number of writebacks from L2:";
         message[15] = "  p. total memory traffic:";
         
-        DecimalFormat df = new DecimalFormat("#.####");
-        df.setRoundingMode(RoundingMode.CEILING);
-        double x=0.000000;
+        double x=0.0;
         String data[]=new String[16];
         data[0]  = String.valueOf(L1.getReadReq());
         data[1]  = String.valueOf(L1.getReadMisses());
         data[2]  = String.valueOf(L1.getWriteReq());
         data[3]  = String.valueOf(L1.getWriteMisses());
         data[4]  = String.valueOf(L1.getSwapsReq());
-        data[5]  = df.format(L1.getSwapReqRate());
+        data[5]  = String.format("%.4f", L1.getSwapReqRate());
         data[6]  = String.valueOf(L1.getSwaps());
-        data[7]  = df.format(L1.combinedMissRate());
+        data[7]  = String.format("%.04f",L1.combinedMissRate());
         data[8]  = String.valueOf(L1.getWritebacks());
         if(L2!=null){
                 data[9] = String.valueOf(L2.getReadReq());
                 data[10] = String.valueOf(L2.getReadMisses());
                 data[11] = String.valueOf(L2.getWriteReq());
                 data[12] = String.valueOf(L2.getWriteMisses());
-                data[13] = df.format(L2.getFinalLevel());
+                data[13] = String.format("%.04f",L2.getFinalLevel());
                 data[14] = String.valueOf(L2.getWritebacks());
         }
         else{
@@ -172,7 +158,7 @@ public class Memory {
                 data[10] = String.valueOf(0);
                 data[11] = String.valueOf(0);
                 data[12] = String.valueOf(0);
-                data[13] = String.valueOf(0.00000);
+                data[13] = String.format("%.04f", x);
                 data[14] = String.valueOf(0);
         }
         data[15] = String.valueOf(memRef+memWriteBack);
@@ -188,3 +174,4 @@ public class Memory {
         }
     }
 }
+

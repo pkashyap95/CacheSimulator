@@ -35,20 +35,14 @@ public class sim_cache
 
         // Print params
         System.out.printf("  ===== Simulator configuration =====%n"+
-                "  L1_BLOCKSIZE:                     %d%n"+
+                "  BLOCKSIZE:                        %d%n"+
                 "  L1_SIZE:                          %d%n"+
                 "  L1_ASSOC:                         %d%n"+
                 "  VC_NUM_BLOCKS:                    %d%n"+
                 "  L2_SIZE:                          %d%n"+
                 "  L2_ASSOC:                         %d%n"+
                 "  trace_file:                       %s%n%n", params.block_size, params.l1_size, params.l1_assoc, params.vc_num_blocks, params.l2_size, params.l2_assoc, trace_file);
-        // Read file line by line
-//        Cache L1= new Cache("L1",params.block_size, params.l1_size, params.l1_assoc);
-//        Cache L2= new Cache("L2",params.block_size, params.l2_size, params.l2_assoc);
-//        returnVal returnStatL1;
-//        returnVal returnStatL2;
-//        double memRef=0;
-//        double memWriteBack=0;
+
         Memory memHeir=new Memory(params);
         int block_offset =(int) (log(params.block_size)/log(2));
         try (BufferedReader br = new BufferedReader(new FileReader(trace_file)))
@@ -102,94 +96,14 @@ public class sim_cache
                             memHeir.writeL1L2(binaryAddr);
                         }
                     }
-                };
-                
-//                if (rw == 'r'){
-//                    returnStatL1 = L1.read(binaryAddr);  // Print and test if file is read correctly 
-//                    if(returnStatL1.flag ==1){
-//                        returnStatL2=L2.read(binaryAddr);
-//                        if(returnStatL2.flag == 1){
-//                            memRef++;
-//                        }
-//                        else if(returnStatL2.flag == 2){
-//                            memRef++;
-//                            memWriteBack++;
-//                        }
-//                    }
-//                    else if(returnStatL1.flag == 2){
-//                        returnStatL2=L2.write(returnStatL1.writeBackAddr);
-//                   
-//                        if(returnStatL2.flag == 1){
-//                            memRef++;
-//                        }
-//                        else if(returnStatL2.flag == 2){
-//                            memWriteBack++;
-//                            memRef++;
-//                        }
-//                        returnStatL2=L2.read(binaryAddr);
-//                        
-//                        if(returnStatL2.flag == 1){
-//                            memRef++;
-//                        }
-//                        else if(returnStatL2.flag == 2){
-//                            memWriteBack++;
-//                            memRef++;
-//                        }
-//                    }
-//                }
-//                else if (rw == 'w'){
-//                    returnStatL1 = L1.write(binaryAddr);    // Print and test if file is read correctly 
-//                    
-//                    if(returnStatL1.flag ==1){
-//                        
-//                        returnStatL2=L2.read(binaryAddr);
-//                        
-//                        if(returnStatL2.flag == 1){
-//                            memRef++;
-//                        }
-//                        
-//                        else if(returnStatL2.flag == 2){
-//                            memRef++;
-//                            memWriteBack++;
-//                        }
-//                    }
-//                    
-//                    else if(returnStatL1.flag == 2){
-//                        returnStatL2=L2.write(returnStatL1.writeBackAddr);
-//                   
-//                        if(returnStatL2.flag == 1){
-//                            memRef++;
-//                        }
-//                        else if(returnStatL2.flag == 2){
-//                            memWriteBack++;
-//                            memRef++;
-//                        }
-//                        
-//                        returnStatL2=L2.read(binaryAddr);
-//                        
-//                        if(returnStatL2.flag == 1){
-//                            memRef++;
-//                        }
-//                        
-//                        else if(returnStatL2.flag == 2){
-//                            memWriteBack++;
-//                            memRef++;
-//                        }
-//                    }
-//                }
-                /* ************************************
-                  Add (calls to) cache code here
-                **************************************/
-                //System.out.println("------------------------------------------");
+                }
             }
         }
         catch (IOException x)                                       // Throw error if file I/O fails
         {
             System.err.format("IOException: %s%n", x);
         }
-//        L1.print();
-//        L2.print();
-//        System.out.println("TOTAL MEMORY TRAFFIC: "+ (memWriteBack+memRef));
         memHeir.printStats();
     }
 }
+

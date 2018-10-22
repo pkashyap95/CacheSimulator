@@ -3,14 +3,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- *
- * 
- * © by Priyank Kashyap
- */
 public class Cache {
     private long mBlockSize;
     private long mAssoc;
@@ -530,8 +522,9 @@ public class Cache {
                     System.out.print("        "+ " "+ dirty+" ");
                 }
             }
+            System.out.print("\n");
         }
-        System.out.print("\n\n");
+        System.out.print("\n");
     }
  
     int getReadReq(){
@@ -552,8 +545,8 @@ public class Cache {
     int getWritebacks(){
         return (int)writeBack;
     }
-    double getSwapsReq(){
-        return mSwapReq;
+    int getSwapsReq(){
+        return (int) mSwapReq;
     }
     double getSwapReqRate(){
         return (mSwapReq/(readReqs+writeReqs));
